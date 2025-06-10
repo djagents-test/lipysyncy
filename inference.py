@@ -417,25 +417,16 @@ def process_request():
         logging.exception("An error occurred during processing:")
         return jsonify({'error': str(e)}), 500
 
-# Gunicorn entry point
-def start():
-    # Create necessary directories
+# Create necessary directories for deployment environments like Cloud Run
+def setup_directories():
     os.makedirs(INPUT_DIR, exist_ok=True)
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-    # Clean TEMP_DIR on startup
     if os.path.exists(TEMP_DIR):
         shutil.rmtree(TEMP_DIR)
     os.makedirs(TEMP_DIR, exist_ok=True)
 
-    logging.info(f"CHECKPOINT_PATH: {CHECKPOINT_PATH}")
-    logging.info(f"INPUT_DIR: {INPUT_DIR}")
-    logging.info(f"OUTPUT_DIR: {OUTPUT_DIR}")
-    logging.info(f"TEMP_DIR: {TEMP_DIR}")
-    logging.info(f"CLEANUP_TEMP_FILES: {CLEANUP_TEMP_FILES}")
+setup_directories()
 
-start()
-
-# For Gunicorn: expose `app` for external use
+# For Gunicorn to detect the Flask app
 if __name__ != '__main__':
     app.logger.info("Gunicorn loaded Flask app successfully.")
