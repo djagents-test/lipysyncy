@@ -440,13 +440,12 @@ def setup_directories():
 setup_directories()
 
 # For Gunicorn to detect the Flask app
+gunicorn_app = app
 if __name__ != '__main__':
     app.logger.info("Gunicorn loaded Flask app successfully.")
 
 # Cloud Run entrypoint: ensure correct port binding if run as main
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
+    logging.info(f"Starting Flask app on port {port}...")
     app.run(host='0.0.0.0', port=port)
-
-# Expose app to gunicorn
-gunicorn_app = app
