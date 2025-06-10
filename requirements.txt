@@ -1,0 +1,10 @@
+Flask
+numpy
+opencv-python
+torch
+torchvision
+face-alignment
+librosa
+tqdm
+scipy
+gunicorn
