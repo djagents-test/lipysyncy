@@ -31,6 +31,7 @@ CLEANUP_TEMP_FILES = os.environ.get('CLEANUP_TEMP_FILES', 'True').lower() == 'tr
 
 # Initialize Flask application
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # Optional: set max upload size to 100MB
 
 # Initialize CUDA or CPU
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -416,16 +417,16 @@ def process_request():
         logging.exception("An error occurred during processing:")
         return jsonify({'error': str(e)}), 500
 
-# Run the Flask application
-if __name__ == '__main__':
+# Gunicorn entry point
+def start():
     # Create necessary directories
     os.makedirs(INPUT_DIR, exist_ok=True)
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     # Clean TEMP_DIR on startup
     if os.path.exists(TEMP_DIR):
-        shutil.rmtree(TEMP_DIR)  # Remove the directory if it exists
-    os.makedirs(TEMP_DIR, exist_ok=True)  # Recreate it
+        shutil.rmtree(TEMP_DIR)
+    os.makedirs(TEMP_DIR, exist_ok=True)
 
     logging.info(f"CHECKPOINT_PATH: {CHECKPOINT_PATH}")
     logging.info(f"INPUT_DIR: {INPUT_DIR}")
@@ -433,5 +434,8 @@ if __name__ == '__main__':
     logging.info(f"TEMP_DIR: {TEMP_DIR}")
     logging.info(f"CLEANUP_TEMP_FILES: {CLEANUP_TEMP_FILES}")
 
-    # Start Flask server
-    app.run(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+start()
+
+# For Gunicorn: expose `app` for external use
+if __name__ != '__main__':
+    app.logger.info("Gunicorn loaded Flask app successfully.")
