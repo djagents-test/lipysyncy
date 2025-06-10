@@ -1,7 +1,0 @@
-runtime: python39
-entrypoint: gunicorn -b :$PORT inference:app
-
-# Optional: Adjust resource limits based on your needs.  These are just examples.
-resources:
-  cpu: 1 # Number of CPUs to allocate
-  memory_gb: 4 # Amount of memory in GB
