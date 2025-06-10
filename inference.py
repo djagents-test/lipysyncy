@@ -10,6 +10,8 @@ import logging
 import platform
 import shutil # Import shutil
 
+import urllib.request
+
 from glob import glob
 from tqdm import tqdm
 from flask import Flask, request, jsonify
@@ -28,6 +30,15 @@ OUTPUT_DIR = 'results'
 TEMP_DIR = 'temp'
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'wav', 'mp4', 'avi'}
 CLEANUP_TEMP_FILES = os.environ.get('CLEANUP_TEMP_FILES', 'True').lower() == 'true' # Configurable cleanup
+
+# Ensure checkpoint file exists and download if missing
+def ensure_checkpoint():
+    os.makedirs("checkpoints", exist_ok=True)
+    if not os.path.exists(CHECKPOINT_PATH):
+        logging.info("Downloading Wav2Lip checkpoint...")
+        url = "https://cdn.jsdelivr.net/gh/Rudrabha/Wav2Lip@master/checkpoints/wav2lip.pth"
+        urllib.request.urlretrieve(url, CHECKPOINT_PATH)
+        logging.info("Checkpoint download complete.")
 
 # Initialize Flask application
 app = Flask(__name__)
@@ -252,6 +263,7 @@ def datagen(frames, mels, args):
 def process_wav2lip(face_file, audio_file, outfile, args):
     """Processes the Wav2Lip inference."""
     try:
+        ensure_checkpoint()
 
         if os.path.isfile(face_file) and face_file.split('.')[-1] in ['jpg', 'png', 'jpeg']:
             full_frames = [cv2.imread(face_file)]
