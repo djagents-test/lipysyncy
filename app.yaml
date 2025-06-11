@@ -1,5 +1,5 @@
 runtime: python39
-entrypoint: gunicorn -b :$PORT inference:app
+entrypoint: ["gunicorn", "-b", ":$PORT", "inference:gunicorn_app"]
 
 resources:
   cpu: 1
